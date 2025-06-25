@@ -1,6 +1,8 @@
+module ListSeq where
 import Par
 import Seq
 
+-- sacar despues
 tst f n = tstI 0 where
         tstI n' | n' >= n = []
                 | otherwise = let (e, r) = f n' ||| tstI (n' + 1) in e:r
@@ -10,7 +12,7 @@ instance Seq [] where
 
     singletonS x = [x]
 
-    lengthS s = Prelude.length s
+    lengthS = (Prelude.length)
 
     nthS s n = s Prelude.!! n
 
@@ -25,15 +27,20 @@ instance Seq [] where
     filterS f (x:xs) = let (eval, r) = f x ||| filterS f xs in
         if eval == True then x:r else r
 
-    appendS s1 s2 = s1 ++ s2
+    appendS = (++)
 
-    takeS s n = take n s
+    takeS = (flip take)
 
-    dropS s n = drop n s
+    dropS = (flip drop)
 
     showtS [] = EMPTY
     showtS [x] = ELT x
-    showtS s = let mid = div (lengthS s) 2 in NODE (takeS s mid) (dropS s mid)
+    showtS s = 
+        let 
+            mid = div (lengthS s) 2 
+            (l', r') = takeS s mid ||| dropS s mid
+        in 
+            NODE l' r'
 
     showlS [] = NIL
     showlS (x:xs) = CONS x xs
@@ -52,8 +59,26 @@ instance Seq [] where
 
     fromList xs = xs
 
+    contract op (x:y:xs) = let ys, zs)
 
+-- sacar despues
 lst :: [Int]
 lst = (appendS (singletonS 1) (singletonS 2))
-lst2 :: [Int]
-lst2 = appendS lst (appendS (singletonS 3) (singletonS 4))
+
+
+test :: [Int]
+test = [10..15]
+
+fun :: Int -> (Int, Int)
+fun j = (j, nthS test j)
+
+test2 :: [(Int, Int)]
+test2 = tabulateS fun (lengthS test)
+
+test3 :: [Int]
+test3 = takeS test 2
+
+
+--lst2 :: [Int]
+--lst2 = appendS lst (appendS (singletonS 3) (singletonS 4))
+

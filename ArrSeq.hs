@@ -11,7 +11,7 @@ instance Seq A.Arr where
 
     nthS s n = s A.! n
 
-    tabulateS f n = A.tabulate f n
+    tabulateS = A.tabulate
 
     mapS f s = A.tabulate (\x -> f (nthS s x)) (lengthS s)
 
@@ -40,37 +40,32 @@ instance Seq A.Arr where
 
     joinS s = A.flatten s
 
-    reduceS f b initialS = if lengthS initialS == 0 then b else f (reduceInner initialS) b where
-        reduceInner s   | len == 1 = (nthS s 0)
-                        | len == 2 = f (nthS s 0) (nthS s 1)
-                        | otherwise = let
-                            m = div len 2
-                            (l, r) = (takeS s m, dropS s m)
-                            (lr, rr) = reduceInner l ||| reduceInner r in
-                                f lr rr
-                        where len = lengthS s 
+    -- da error de tipoo
+    reduceS op e s = case (lengthS s) of
+        0 -> e
+        1 -> op e (nthS s 0)
+        _ -> reduceS op e (contractS s)
+        where
+            contractS xs = 
+                let
+                    n = lengthS xs
+                    mid = ceiling ((fromIntegral n) / 2)
+                    tamCont = div (n+1) 2 -- longitud de la version contraida (ceil (n/2))
+                    fun = (\j -> if (j < mid) then op (nthS xs (2*j)) (nthS xs ((2 * j) + 1))  else nthS xs (2*j)) :: Int -> a
+                in
+                    (tabulateS fun tamCont) :: (A.Arr a)
 
-    scanS f b initialS = (contract initialS, b) where
-        contract s  | len == 1 = s
-                    | len == 2 = singletonS (f (nthS s 0) (nthS s 1))
-                    | otherwise = let
-                        m = div len 2
-                        (l, r) = (takeS s m, dropS s m)
-                        (lr, rr) = contract l ||| contract r in
-                            appendS lr rr
-                    where len = lengthS s
 
-        contract2 s | lengthS s == 1 = s
-                    | otherwise = let
-                        (eval, r) = f (nthS s 0) (nthS s 1) ||| contract2 (dropS s 2)
-                            appendS eval r
+    --scanS f b initialS = (contract initialS, b) where
+    scanS = undefined
+
 
     fromList l = A.fromList l
-
-
 
 
 lst :: A.Arr Int
 lst = fromList [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6]
 lst2 :: A.Arr Int
 lst2 = fromList [-2, -1, 0, 1, 2]
+lst3 :: A.Arr Int
+lst3 = fromList [1..10]

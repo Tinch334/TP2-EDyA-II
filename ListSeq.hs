@@ -37,7 +37,7 @@ instance Seq [] where
     showtS [x] = ELT x
     showtS s = 
         let 
-            mid = div (lengthS s) 2 
+            mid = 2 ^ floor (logBase 2 (fromIntegral ((lengthS s) - 1)))
             (l', r') = takeS s mid ||| dropS s mid
         in 
             NODE l' r'
@@ -48,18 +48,38 @@ instance Seq [] where
     joinS [] = []
     joinS (xs:xss) = appendS xs (joinS xss)
 
-    reduceS _ b [] = b
-    reduceS f b (x:xs) = f x (reduceS f b xs)
+    reduceS f b [] = b
+    reduceS f b xs = f b (reduceInner (showtS xs)) where
+        reduceInner (ELT x) = x
+        reduceInner (NODE l r) = let (redL, redR) = (reduceInner (showtS l)) ||| (reduceInner (showtS r)) in
+                                (f redL redR)
 
-    scanS f b s = let (lRes, fRes) = scanSInner (reverse s) in (reverse (tail lRes), fRes) where
-        scanSInner [] = ([b], b)
-        scanSInner (x:xs) = let
-            (l, r) = scanSInner xs
-            cRes = f x (nthS l 0) in (cRes:l, cRes)
+
+    scanS f b [] = (emptyS, b)
+    scanS f b (x:[]) = (singletonS b, f b x)
+    scanS op base seq = 
+        let 
+            len = lengthS seq
+            contracted = contractL op seq
+            (cList, cRes) = scanS op base contracted
+        in  (expandL op seq cList, cRes)
 
     fromList xs = xs
 
-    contract op (x:y:xs) = let ys, zs)
+contractL f (x:y:xs) = 
+    let 
+        (xy, ys) = f x y ||| contractL f xs
+    in  xy : ys
+contractL f xs = xs
+
+expandL f xs (y:ys) = y : expandLodd xs (y:ys) where
+    expandLodd (x:_:xs) (y:ys) = 
+        let 
+            (elem, rest) = (f y x) ||| expandLeven xs ys
+        in elem : rest
+    expandLodd _ _ = []
+    expandLeven xs (y:ys) = y : expandLodd xs (y:ys)
+    expandLeven _ _ = []
 
 -- sacar despues
 lst :: [Int]
@@ -67,7 +87,7 @@ lst = (appendS (singletonS 1) (singletonS 2))
 
 
 test :: [Int]
-test = [10..15]
+test = fromList [1 .. 11]
 
 fun :: Int -> (Int, Int)
 fun j = (j, nthS test j)

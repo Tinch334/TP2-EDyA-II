@@ -1,8 +1,10 @@
+import qualified Arr as A
 import Par
 import Seq
-import qualified Arr as A
+
 
 instance Seq A.Arr where
+
     emptyS = A.empty
 
     singletonS x = A.fromList [x]
@@ -11,7 +13,7 @@ instance Seq A.Arr where
 
     nthS s n = s A.! n
 
-    tabulateS = A.tabulate
+    tabulateS f n = A.tabulate f n
 
     mapS f s = A.tabulate (\x -> f (nthS s x)) (lengthS s)
 
@@ -44,23 +46,31 @@ instance Seq A.Arr where
     reduceS op e s = case (lengthS s) of
         0 -> e
         1 -> op e (nthS s 0)
-        _ -> reduceS op e (contractS s)
-        where
-            contractS xs = 
+        _ -> reduceS op e (contractS op s)
+            
+    scanS op base seq = case (lengthS seq) of
+        0 -> (emptyS, base)
+        1 -> (singletonS base, op base (nthS seq 0))
+        _ -> let 
+                len = lengthS seq
+                contracted = contractS op seq
+                (cList, cRes) = scanS op base contracted
+            in  (expandS op (lengthS seq) seq cList, cRes) 
+    
+    fromList xs = A.fromList xs
+
+contractS op xs =
                 let
                     n = lengthS xs
-                    mid = ceiling ((fromIntegral n) / 2)
-                    tamCont = div (n+1) 2 -- longitud de la version contraida (ceil (n/2))
-                    fun = (\j -> if (j < mid) then op (nthS xs (2*j)) (nthS xs ((2 * j) + 1))  else nthS xs (2*j)) :: Int -> a
-                in
-                    (tabulateS fun tamCont) :: (A.Arr a)
+                    tam = div n 2
+                    mid = div (n+1) 2
+                    f j = if (j < tam ) then (op (nthS xs (2*j)) (nthS xs ((2 * j) + 1))) else (nthS xs (2*j))
+                in A.tabulate f mid
 
+expandS op n xs ys = A.tabulate f n
+    where 
+        f j = if even j then nthS ys (div j 2) else op (nthS ys (div j 2)) (nthS xs (j - 1))  
 
-    --scanS f b initialS = (contract initialS, b) where
-    scanS = undefined
-
-
-    fromList l = A.fromList l
 
 
 lst :: A.Arr Int

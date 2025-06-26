@@ -48,12 +48,6 @@ instance Seq [] where
     reduceS f b [x] = f b x
     reduceS f b xs = reduceS f b (contractL f xs)
 
-    {-
-    reduceS f b [] = b
-    reduceS f b xs = f b (reduceInner (toTreeS xs)) where
-        reduceInner (ELT x) = x
-        reduceInner (NODE l r) = let (redL, redR) = (reduceInner (toTreeS l)) ||| (reduceInner (toTreeS r)) in
-                                (f redL redR)-}
     scanS f b [] = (emptyS, b)
     scanS f b (x:[]) = (singletonS b, f b x)
     scanS op base seq = 
@@ -90,25 +84,3 @@ expandL f xs (y:ys) = y : expandLodd xs (y:ys) where
     expandLodd _ _ = []
     expandLeven xs (y:ys) = y : expandLodd xs (y:ys)
     expandLeven _ _ = []
-
--- sacar despues
-lst :: [Int]
-lst = (appendS (singletonS 1) (singletonS 2))
-
-
-test :: [Int]
-test = fromList [1 .. 11]
-
-fun :: Int -> (Int, Int)
-fun j = (j, nthS test j)
-
-test2 :: [(Int, Int)]
-test2 = tabulateS fun (lengthS test)
-
-test3 :: [Int]
-test3 = takeS test 2
-
-
---lst2 :: [Int]
---lst2 = appendS lst (appendS (singletonS 3) (singletonS 4))
-

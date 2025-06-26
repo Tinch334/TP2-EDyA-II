@@ -64,6 +64,7 @@ instance Seq A.Arr where
     
     fromList = A.fromList
 
+-- funciones auxiliares --
 contractS op xs =
                 let
                     n = lengthS xs
@@ -75,12 +76,3 @@ contractS op xs =
 expandS op n xs ys = A.tabulate f n
     where 
         f j = if even j then nthS ys (div j 2) else op (nthS ys (div j 2)) (nthS xs (j - 1))  
-
-
-
-lst :: A.Arr Int
-lst = fromList [1, 2, 3, 4, 5, 6, 1, 2, 3, 4, 5, 6]
-lst2 :: A.Arr Int
-lst2 = fromList [-2, -1, 0, 1, 2]
-lst3 :: A.Arr Int
-lst3 = fromList [1..10]

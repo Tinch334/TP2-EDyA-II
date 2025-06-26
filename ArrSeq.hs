@@ -1,3 +1,4 @@
+module ArrSeq where
 import qualified Arr as A
 import Par
 import Seq
@@ -9,11 +10,11 @@ instance Seq A.Arr where
 
     singletonS x = A.fromList [x]
 
-    lengthS s = A.length s
+    lengthS = A.length
 
-    nthS s n = s A.! n
+    nthS s n = (s A.! n)
 
-    tabulateS f n = A.tabulate f n
+    tabulateS = A.tabulate
 
     mapS f s = A.tabulate (\x -> f (nthS s x)) (lengthS s)
 
@@ -34,19 +35,23 @@ instance Seq A.Arr where
 
     showtS s    | len == 0 = EMPTY
                 | len == 1 = ELT (nthS s 0)
-                | otherwise = let mid = div len 2 in NODE (takeS s mid) (dropS s mid)
+                | otherwise = 
+                            let 
+                                -- (?)
+                                mid = div len 2 
+                                (l', r') = takeS s mid ||| dropS s mid
+                            in NODE l' r'
                 where len = lengthS s
 
     showlS s    | lengthS s == 0 = NIL
                 | otherwise = CONS (nthS s 0) (dropS s 1)
 
-    joinS s = A.flatten s
+    joinS = A.flatten
 
-    -- da error de tipoo
-    reduceS op e s = case (lengthS s) of
-        0 -> e
-        1 -> op e (nthS s 0)
-        _ -> reduceS op e (contractS op s)
+    reduceS op b s = case (lengthS s) of
+        0 -> b
+        1 -> op b (nthS s 0)    
+        _ -> reduceS op b (contractS op s)
             
     scanS op base seq = case (lengthS seq) of
         0 -> (emptyS, base)
@@ -57,15 +62,15 @@ instance Seq A.Arr where
                 (cList, cRes) = scanS op base contracted
             in  (expandS op (lengthS seq) seq cList, cRes) 
     
-    fromList xs = A.fromList xs
+    fromList = A.fromList
 
 contractS op xs =
                 let
                     n = lengthS xs
-                    tam = div n 2
-                    mid = div (n+1) 2
-                    f j = if (j < tam ) then (op (nthS xs (2*j)) (nthS xs ((2 * j) + 1))) else (nthS xs (2*j))
-                in A.tabulate f mid
+                    mid = div n 2
+                    tam = div (n+1) 2
+                    f j = if (j < mid ) then (op (nthS xs (2*j)) (nthS xs ((2 * j) + 1))) else (nthS xs (2*j))
+                in A.tabulate f tam
 
 expandS op n xs ys = A.tabulate f n
     where 

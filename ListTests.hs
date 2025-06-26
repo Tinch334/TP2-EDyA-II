@@ -1,14 +1,15 @@
--- aca ponia module ListTests where
+module ListTests where
 
 import Test.HUnit
 import Seq
 import ListSeq
 
-s0, s1, s2, s3 :: [Int]
+s0, s1, s2, s3 ,s4:: [Int]
 s0 = fromList []
 s1 = fromList [4]
 s2 = fromList [5,1]
 s3 = fromList [6,3,4]
+s4 = fromList [1..33]
 
 testLengthEmptySeq :: Test
 testLengthEmptySeq = 

@@ -2,11 +2,6 @@ module ListSeq where
 import Par
 import Seq
 
--- sacar despues
-tst f n = tstI 0 where
-        tstI n' | n' >= n = []
-                | otherwise = let (e, r) = f n' ||| tstI (n' + 1) in e:r
-
 instance Seq [] where
     emptyS = []
 
@@ -33,11 +28,12 @@ instance Seq [] where
 
     dropS = (flip drop)
 
+     
     showtS [] = EMPTY
     showtS [x] = ELT x
     showtS s = 
         let 
-            mid = 2 ^ floor (logBase 2 (fromIntegral ((lengthS s) - 1)))
+            mid = div (lengthS s) 2 
             (l', r') = takeS s mid ||| dropS s mid
         in 
             NODE l' r'
@@ -49,9 +45,9 @@ instance Seq [] where
     joinS (xs:xss) = appendS xs (joinS xss)
 
     reduceS f b [] = b
-    reduceS f b xs = f b (reduceInner (showtS xs)) where
+    reduceS f b xs = f b (reduceInner (toTreeS xs)) where
         reduceInner (ELT x) = x
-        reduceInner (NODE l r) = let (redL, redR) = (reduceInner (showtS l)) ||| (reduceInner (showtS r)) in
+        reduceInner (NODE l r) = let (redL, redR) = (reduceInner (toTreeS l)) ||| (reduceInner (toTreeS r)) in
                                 (f redL redR)
 
 
@@ -65,6 +61,17 @@ instance Seq [] where
         in  (expandL op seq cList, cRes)
 
     fromList xs = xs
+
+-- funciones auxiliares --
+
+toTreeS [] = EMPTY
+toTreeS [x] = ELT x
+toTreeS s = 
+    let 
+        mid = 2 ^ floor (logBase 2 (fromIntegral ((lengthS s) - 1)))
+        (l', r') = takeS s mid ||| dropS s mid
+    in 
+        NODE l' r'
 
 contractL f (x:y:xs) = 
     let 

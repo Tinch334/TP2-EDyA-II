@@ -5,12 +5,13 @@ import Seq
 import Arr        (Arr)
 import ArrSeq
 
-s0, s1, s2, s3,s4 :: Arr Int
+s0, s1, s2, s3,s4,s5 :: Arr Int
 s0 = fromList []
 s1 = fromList [4]
 s2 = fromList [5,1]
 s3 = fromList [6,3,4]
 s4 = fromList [1..33]
+s5 = fromList [1..15]
 
 testLengthEmptySeq :: Test
 testLengthEmptySeq = 

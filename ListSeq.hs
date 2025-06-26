@@ -20,14 +20,13 @@ instance Seq [] where
 
     filterS _ [] = []
     filterS f (x:xs) = let (eval, r) = f x ||| filterS f xs in
-        if eval == True then x:r else r
+        if eval then x:r else r
 
     appendS = (++)
 
     takeS = (flip take)
 
     dropS = (flip drop)
-
      
     showtS [] = EMPTY
     showtS [x] = ELT x
@@ -44,13 +43,17 @@ instance Seq [] where
     joinS [] = []
     joinS (xs:xss) = appendS xs (joinS xss)
 
+    
+    reduceS f b [] = b
+    reduceS f b [x] = f b x
+    reduceS f b xs = reduceS f b (contractL f xs)
+
+    {-
     reduceS f b [] = b
     reduceS f b xs = f b (reduceInner (toTreeS xs)) where
         reduceInner (ELT x) = x
         reduceInner (NODE l r) = let (redL, redR) = (reduceInner (toTreeS l)) ||| (reduceInner (toTreeS r)) in
-                                (f redL redR)
-
-
+                                (f redL redR)-}
     scanS f b [] = (emptyS, b)
     scanS f b (x:[]) = (singletonS b, f b x)
     scanS op base seq = 
@@ -73,11 +76,11 @@ toTreeS s =
     in 
         NODE l' r'
 
-contractL f (x:y:xs) = 
+contractL f (x:y:zs) = 
     let 
-        (xy, ys) = f x y ||| contractL f xs
-    in  xy : ys
-contractL f xs = xs
+        (xy, zs') = f x y ||| contractL f zs
+    in  xy : zs'
+contractL f zs = zs
 
 expandL f xs (y:ys) = y : expandLodd xs (y:ys) where
     expandLodd (x:_:xs) (y:ys) = 

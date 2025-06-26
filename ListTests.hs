@@ -4,12 +4,14 @@ import Test.HUnit
 import Seq
 import ListSeq
 
-s0, s1, s2, s3 ,s4:: [Int]
+s0, s1, s2, s3 ,s4, s5,s6:: [Int]
 s0 = fromList []
 s1 = fromList [4]
 s2 = fromList [5,1]
 s3 = fromList [6,3,4]
 s4 = fromList [1..33]
+s5 = fromList [1..15]
+s6 = fromList [1..10]
 
 testLengthEmptySeq :: Test
 testLengthEmptySeq = 
@@ -66,11 +68,5 @@ testsLists =
 
 main :: IO Counts
 main = runTestTT $ TestList testsLists
-
--- ghc --make ListTests.hs
--- en ghci: :set -package HUnit
-
--- ghc --make ListTests.hs -package HUnit -o tests
--- ./tests
 
 
